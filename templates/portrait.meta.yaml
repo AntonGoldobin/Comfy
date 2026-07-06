@@ -18,51 +18,59 @@ requiresTags:
   - sdxl
   - portrait
 
-# Parameter mapping: field name → workflow node + field
+# Parameter mapping — must match CreateStyleSchema.paramMapping
 paramMapping:
   prompt:
-    node: "4"
-    field: "text"
-    type: string
+    type: text
+    class_type: CLIPTextEncode
+    input: text
+    label: "Prompt"
     required: true
     default: ""
 
   negative_prompt:
-    node: "5"
-    field: "text"
-    type: string
+    type: text
+    class_type: CLIPTextEncode
+    input: text
+    label: "Negative Prompt"
     required: false
     default: "low quality, blurry, watermark, deformed"
 
   seed:
-    node: "3"
-    field: "seed"
-    type: integer
+    type: number
+    class_type: KSampler
+    input: seed
+    label: "Seed"
     required: false
-    default: -1  # -1 = random
+    default: -1
+    min: -1
+    max: 999999999
 
   steps:
-    node: "3"
-    field: "steps"
-    type: integer
+    type: number
+    class_type: KSampler
+    input: steps
+    label: "Steps"
     required: false
     default: 30
     min: 1
     max: 100
 
   cfg:
-    node: "3"
-    field: "cfg"
-    type: float
+    type: number
+    class_type: KSampler
+    input: cfg
+    label: "CFG Scale"
     required: false
     default: 7.0
     min: 1.0
     max: 30.0
 
   model:
-    node: "1"
-    field: "ckpt_name"
-    type: string
+    type: text
+    class_type: CheckpointLoaderSimple
+    input: ckpt_name
+    label: "Model"
     required: false
     default: "sd_xl_base_1.0.safetensors"
 
