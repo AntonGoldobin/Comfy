@@ -1,0 +1,24 @@
+# Environment files
+.env
+.env.local
+.env.production
+
+# Generated outputs
+output/
+models/
+
+# Custom nodes (can be large)
+custom_nodes/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

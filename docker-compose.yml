@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  comfyui:
+    image: comfyorg/comfyui
+    container_name: comfyui
+    ports:
+      - "8188:8188"
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=auto
+      - CUDA_VISIBLE_DEVICES=0
+    volumes:
+      - ./output:/output
+      - ./models:/models
+      - ./custom_nodes:/workspace/ComfyUI/custom_nodes
+    runtime: nvidia
+    environment:
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8188/system_stats"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  output:
+  models:
+  custom_nodes:

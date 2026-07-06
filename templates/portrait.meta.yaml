@@ -1,0 +1,73 @@
+# Portrait Generation Template Metadata
+# Used by Reelant sync to upsert Style in DB
+
+slug: portrait
+name: "Portrait Generator"
+description: "High-quality human portrait using SDXL"
+version: "1.0"
+category: "portrait"
+modelSet: "sdxl"
+
+# Cost & timing
+costTokens: 50
+avgDurationSec: 30
+maxExpectedDurationSec: 120
+
+# Required GPU tags
+requiresTags:
+  - sdxl
+  - portrait
+
+# Parameter mapping: field name → workflow node + field
+paramMapping:
+  prompt:
+    node: "4"
+    field: "text"
+    type: string
+    required: true
+    default: ""
+
+  negative_prompt:
+    node: "5"
+    field: "text"
+    type: string
+    required: false
+    default: "low quality, blurry, watermark, deformed"
+
+  seed:
+    node: "3"
+    field: "seed"
+    type: integer
+    required: false
+    default: -1  # -1 = random
+
+  steps:
+    node: "3"
+    field: "steps"
+    type: integer
+    required: false
+    default: 30
+    min: 1
+    max: 100
+
+  cfg:
+    node: "3"
+    field: "cfg"
+    type: float
+    required: false
+    default: 7.0
+    min: 1.0
+    max: 30.0
+
+  model:
+    node: "1"
+    field: "ckpt_name"
+    type: string
+    required: false
+    default: "sd_xl_base_1.0.safetensors"
+
+# Output config
+output:
+  node: "10"
+  type: images
+  subfolder: "portrait"

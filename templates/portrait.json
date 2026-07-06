@@ -1,0 +1,51 @@
+{
+  "3": {
+    "inputs": {
+      "seed": 42,
+      "steps": 30,
+      "cfg": 7.0,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "positive": ["4", 0],
+      "negative": ["5", 0],
+      "latent_image": ["6", 0]
+    },
+    "class_type": "KSampler"
+  },
+  "4": {
+    "inputs": {
+      "text": "{{prompt}}",
+      "clip": ["1", 1]
+    },
+    "class_type": "CLIPTextEncode"
+  },
+  "5": {
+    "inputs": {
+      "text": "{{negative_prompt}}",
+      "clip": ["1", 1]
+    },
+    "class_type": "CLIPTextEncode"
+  },
+  "6": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage"
+  },
+  "1": {
+    "inputs": {
+      "ckpt_name": "{{model}}"
+    },
+    "class_type": "CheckpointLoaderSimple"
+  },
+  "10": {
+    "inputs": {
+      "images": ["3", 0],
+      "filename_prefix": "portrait",
+      "output_dir": "output"
+    },
+    "class_type": "SaveImage"
+  }
+}
