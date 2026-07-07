@@ -1,14 +1,50 @@
 """
 handler.py — RunPod Serverless entrypoint.
 
-This file exists solely to be scanned by RunPod's pre-deploy check.
-All logic is delegated to runpod_handler module.
+Starts ComfyUI as a sidecar, then runs the RunPod serverless handler.
 """
 
 import asyncio
+import subprocess
+import sys
+import time
 import runpod
 
 from runpod_handler import _worker
 
-# RunPod pre-deploy check scans for this exact pattern:
-runpod.serverless.start({"handler": lambda job: asyncio.get_event_loop().run_until_complete(_worker.handler(job))})
+
+def start_comfyui_sidecar():
+    """Start ComfyUI in background and wait for it to be ready."""
+    print("Starting ComfyUI sidecar...")
+    proc = subprocess.Popen(
+        [sys.executable, "main.py", "--listen", "0.0.0.0", "--port", "8188"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+    # Wait for ComfyUI to be ready
+    for _ in range(60):
+        try:
+            import httpx
+            resp = httpx.get("http://localhost:8188/system_stats", timeout=2)
+            if resp.status_code == 200:
+                print("ComfyUI sidecar is ready")
+                return proc
+        except Exception:
+            pass
+        time.sleep(2)
+    print("WARNING: ComfyUI sidecar may not be ready")
+    return proc
+
+
+def handler(job):
+    """Named handler function for runpod.serverless.start()."""
+    return asyncio.get_event_loop().run_until_complete(_worker.handler(job))
+
+
+if __name__ == "__main__":
+    # Start ComfyUI as sidecar (required for workflow execution)
+    start_comfyui_sidecar()
+
+    # Start RunPod serverless handler (this blocks forever)
+    print("Starting RunPod serverless handler...")
+    runpod.serverless.start({"handler": handler})
