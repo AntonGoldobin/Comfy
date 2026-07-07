@@ -23,7 +23,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: antongoldobin
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
@@ -32,6 +32,6 @@ jobs:
           context: .
           file: ./Dockerfile.serverless
           push: true
-          tags: ghcr.io/${{ github.repository_owner.toLower }}/comfy-runpod:latest
+          tags: ghcr.io/antongoldobin/comfy-runpod:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
