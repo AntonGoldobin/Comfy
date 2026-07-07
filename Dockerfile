@@ -1,4 +1,4 @@
-FROM comfyorg/comfyui
+FROM ghcr.io/comfyanonymous/comfyui:latest
 
 # Install Python dependencies for the RunPod handler
 COPY requirements.txt /tmp/
