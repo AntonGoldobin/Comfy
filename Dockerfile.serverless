@@ -12,6 +12,14 @@ COPY startup.sh /workspace/ComfyUI/
 # Create output and input directories
 RUN mkdir -p /output /input && chmod +x /workspace/ComfyUI/startup.sh
 
+# Download SVD (Stable Video Diffusion) model
+# SVD nodes (SVD_Load, SVD_Sampler, SVD_img2vid_Conditioning) are built into ComfyUI core
+# but the model weights must be downloaded separately
+RUN mkdir -p /workspace/ComfyUI/models/checkpoints && \
+    wget -q --show-progress https://huggingface.co/stabilityai/stable-video-diffusion-img2vid/resolve/main/svd.safetensors \
+    -O /workspace/ComfyUI/models/checkpoints/svd.safetensors || \
+    echo "SVD model download skipped (model may already exist or network issue)"
+
 # Set environment
 ENV PYTHONUNBUFFERED=1
 ENV COMFYUI_URL=http://localhost:8188
