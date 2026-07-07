@@ -4,8 +4,9 @@ FROM comfyorg/comfyui
 COPY requirements.txt /tmp/
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-# Copy handler and startup script
+# Copy handler files
 COPY runpod_handler.py /workspace/ComfyUI/
+COPY handler.py /workspace/ComfyUI/
 COPY startup.sh /workspace/ComfyUI/
 
 # Create output and input directories

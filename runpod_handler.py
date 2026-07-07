@@ -392,22 +392,5 @@ class ComfyWorker:
         return types.get(ext, 'application/octet-stream')
 
 
-# Instantiate worker once at module load (not per-request).
+# Worker instance — imported by handler.py for runpod.serverless.start()
 _worker = ComfyWorker()
-
-
-def handler(job) -> dict:
-    """
-    Module-level handler exposed for runpod.serverless.start().
-
-    RunPod Serverless invokes this for each queued job.
-    The asyncio.run() wrapper is required because RunPod calls
-    handlers synchronously while the SDK manages the event loop.
-    """
-    return asyncio.get_event_loop().run_until_complete(_worker.handler(job))
-
-
-# Start the RunPod Serverless Worker.
-# Uses runpod.serverless.start() for queue-based endpoints (RunPod deploy).
-# The pre-deploy check scans for this exact call pattern.
-runpod.serverless.start({"handler": handler})
