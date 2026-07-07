@@ -1,32 +1,29 @@
 #!/bin/bash
 set -e
 
+echo "=== ComfyUI RunPod Serverless Startup ==="
+
+# ComfyUI needs to be running for the handler to submit workflows
+# Start ComfyUI in background
 echo "Starting ComfyUI..."
+python main.py --listen 0.0.0.0 --port 8188 &
+COMFYUI_PID=$!
 
-# Load environment variables if .env exists
-if [ -f .env ]; then
-    echo "Loading environment from .env..."
-    export $(cat .env | grep -v '^#' | xargs)
-fi
-
-# Build extra arguments
-EXTRA_ARGS=""
-
-if [ -n "$COMFYUI_API_KEY" ]; then
-    echo "API key is set - ComfyUI will require authentication"
-    # Note: ComfyUI doesn't have built-in API key auth in the standard image
-    # If needed, use a reverse proxy with auth
-fi
-
-# Start docker-compose
-echo "Starting container..."
-docker compose up -d
-
-echo ""
+# Wait for ComfyUI to be ready
 echo "Waiting for ComfyUI to be ready..."
-sleep 5
+for i in {1..60}; do
+    if curl -sf http://localhost:8188/system_stats > /dev/null 2>&1; then
+        echo "ComfyUI is ready!"
+        break
+    fi
+    if ! kill -0 $COMFYUI_PID 2>/dev/null; then
+        echo "ComfyUI process died!"
+        exit 1
+    fi
+    echo "Waiting... ($i/60)"
+    sleep 2
+done
 
-# Follow logs
-echo ""
-echo "=== ComfyUI Startup Logs ==="
-docker compose logs -f
+# Start the RunPod Serverless handler (this blocks)
+echo "Starting RunPod Serverless Worker..."
+exec python runpod_handler.py

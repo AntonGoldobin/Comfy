@@ -1,18 +1,27 @@
 FROM comfyorg/comfyui
 
-# Install dependencies
+# Install Python dependencies for the handler
 COPY requirements.txt /tmp/
-RUN pip install -r /tmp/requirements.txt --quiet
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-# Copy handler
+# Copy handler and startup script
 COPY runpod_handler.py /workspace/ComfyUI/
+COPY startup.sh /workspace/ComfyUI/
 
-# Set working directory
-WORKDIR /workspace/ComfyUI
+# Create output and input directories
+RUN mkdir -p /output /input && chmod +x /workspace/ComfyUI/startup.sh
+
+# Set environment
+ENV PYTHONUNBUFFERED=1
+ENV COMFYUI_URL=http://localhost:8188
+ENV COMFYUI_API_KEY=
+
+# ComfyUI API port
+EXPOSE 8188
 
 # Health check - ComfyUI API
 HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
-  CMD curl -f http://localhost:8188/system_stats || exit 1
+  CMD curl -sf http://localhost:8188/system_stats || exit 1
 
-# Run ComfyUI server (port 8188) - RunPod maps this to its own port
-CMD ["python", "main.py", "--listen", "0.0.0.0", "--port", "8188"]
+# Start ComfyUI, wait for it, then run the RunPod handler
+ENTRYPOINT ["/workspace/ComfyUI/startup.sh"]
