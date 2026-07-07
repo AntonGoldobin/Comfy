@@ -33,5 +33,4 @@ jobs:
           file: ./Dockerfile.serverless
           push: true
           tags: ghcr.io/antongoldobin/comfy-runpod:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          no-cache: true
