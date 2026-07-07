@@ -21,7 +21,6 @@ def start_comfyui_sidecar():
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
     )
-    # Wait for ComfyUI to be ready
     for _ in range(60):
         try:
             import httpx
@@ -37,14 +36,12 @@ def start_comfyui_sidecar():
 
 
 def handler(job):
-    """Named handler function for runpod.serverless.start()."""
+    """Named handler for runpod.serverless.start()."""
     return asyncio.get_event_loop().run_until_complete(_worker.handler(job))
 
 
-if __name__ == "__main__":
-    # Start ComfyUI as sidecar (required for workflow execution)
-    start_comfyui_sidecar()
-
-    # Start RunPod serverless handler (this blocks forever)
-    print("Starting RunPod serverless handler...")
-    runpod.serverless.start({"handler": handler})
+# Start ComfyUI sidecar and then the RunPod serverless handler.
+# This runs at module load time (not inside if __name__ == "__main__")
+# so RunPod's pre-deploy scanner finds it.
+start_comfyui_sidecar()
+runpod.serverless.start({"handler": handler})
