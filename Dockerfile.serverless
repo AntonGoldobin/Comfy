@@ -1,0 +1,18 @@
+FROM comfyorg/comfyui
+
+# Install dependencies
+COPY requirements.txt /tmp/
+RUN pip install -r /tmp/requirements.txt --quiet
+
+# Copy handler
+COPY runpod_handler.py /workspace/ComfyUI/
+
+# Set working directory
+WORKDIR /workspace/ComfyUI
+
+# Health check - ComfyUI API
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
+  CMD curl -f http://localhost:8188/system_stats || exit 1
+
+# Run ComfyUI server (port 8188) - RunPod maps this to its own port
+CMD ["python", "main.py", "--listen", "0.0.0.0", "--port", "8188"]

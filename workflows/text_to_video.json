@@ -1,0 +1,51 @@
+{
+  "TextEncode_Pos": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "{{prompt}}",
+      "clip": ["CogVideoXLoader", 1]
+    }
+  },
+  "TextEncode_Neg": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "{{negative_prompt | default('blurry, low quality')}}",
+      "clip": ["CogVideoXLoader", 1]
+    }
+  },
+  "CogVideoXLoader": {
+    "class_type": "CogVideoXLoader",
+    "inputs": {
+      "model_name": "CogVideoX-2b"
+    }
+  },
+  "CogVideoX_Sampler": {
+    "class_type": "CogVideoX_Sampler",
+    "inputs": {
+      "text": ["TextEncode_Pos", 0],
+      "negative_text": ["TextEncode_Neg", 0],
+      "latent": ["EmptyLatentVideo_Text2Video", 0],
+      "seed": "{{seed | default(42)}}",
+      "steps": "{{steps | default(50)}}",
+      "cfg": "{{cfg | default(6.0)}}"
+    }
+  },
+  "EmptyLatentVideo_Text2Video": {
+    "class_type": "EmptyLatentVideo",
+    "inputs": {
+      "width": 720,
+      "height": 480,
+      "frames": "{{frames | default(48)}}",
+      "batch_size": 1
+    }
+  },
+  "VHS_VideoCombine_Text2Video": {
+    "class_type": "VHS_VideoCombine",
+    "inputs": {
+      "images": ["CogVideoX_Sampler", 0],
+      "fps": "{{fps | default(16)}}",
+      "filename_prefix": "text2video",
+      "output_dir": "/output"
+    }
+  }
+}

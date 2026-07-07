@@ -1,0 +1,73 @@
+{
+  "LoadImage": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "{{input_image}}"
+    }
+  },
+  "SVD_img2vid_Portrait": {
+    "class_type": "SVD_img2vid_Conditioning",
+    "inputs": {
+      "image": ["LoadImage", 0],
+      "strength": 0.9
+    }
+  },
+  "EmptyLatentVideo_Portrait": {
+    "class_type": "EmptyLatentVideo",
+    "inputs": {
+      "width": 512,
+      "height": 768,
+      "frames": 25,
+      "batch_size": 1
+    }
+  },
+  "KSampler_Portrait": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": "{{seed | default(123)}}",
+      "steps": 25,
+      "cfg": 6.0,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "positive": ["SVD_img2vid_Portrait", 0],
+      "negative": ["CLIPTextEncode_neg_portrait", 0],
+      "latent_image": ["EmptyLatentVideo_Portrait", 0]
+    }
+  },
+  "CLIPTextEncode_pos_portrait": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "{{prompt | default('portrait photo, professional lighting')}}",
+      "clip": ["CheckpointerLoader_Portrait", 1]
+    }
+  },
+  "CLIPTextEncode_neg_portrait": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "blurry, low quality, distorted, ugly, deformed",
+      "clip": ["CheckpointerLoader_Portrait", 1]
+    }
+  },
+  "CheckpointerLoader_Portrait": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "svd.safetensors"
+    }
+  },
+  "VAEDecode_Portrait": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["KSampler_Portrait", 0],
+      "vae": ["CheckpointerLoader_Portrait", 0]
+    }
+  },
+  "VHS_VideoCombine_Portrait": {
+    "class_type": "VHS_VideoCombine",
+    "inputs": {
+      "images": ["VAEDecode_Portrait", 0],
+      "fps": 24,
+      "filename_prefix": "portrait_video",
+      "output_dir": "/output"
+    }
+  }
+}

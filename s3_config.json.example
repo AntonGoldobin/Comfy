@@ -1,0 +1,11 @@
+{
+  "bucket": "comfyui-outputs",
+  "region": "us-east-1",
+  "accessKeyId": "AKIA...",
+  "secretAccessKey": "...",
+  "endpointUrl": "https://s3.amazonaws.com",
+  "options": {
+    "signatureVersion": "s3v4",
+    "acl": "private"
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "LoadImage": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "{{input_image}}"
+    }
+  },
+  "SVD_img2vid_Conditioning": {
+    "class_type": "SVD_img2vid_Conditioning",
+    "inputs": {
+      "image": ["LoadImage", 0],
+      "strength": "{{strength | default(1.0)}}"
+    }
+  },
+  "EmptyLatentVideo": {
+    "class_type": "EmptyLatentVideo",
+    "inputs": {
+      "width": "{{width | default(1024)}}",
+      "height": "{{height | default(1024)}}",
+      "frames": "{{frames | default(25)}}",
+      "batch_size": 1
+    }
+  },
+  "KSampler": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": "{{seed | default(42)}}",
+      "steps": "{{steps | default(30)}}",
+      "cfg": "{{cfg | default(7.0)}}",
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "positive": ["SVD_img2vid_Conditioning", 0],
+      "negative": ["CLIPTextEncode_neg", 0],
+      "latent_image": ["EmptyLatentVideo", 0]
+    }
+  },
+  "CLIPTextEncode_pos": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "{{positive_prompt | default('')}}",
+      "clip": ["CheckpointerLoader", 1]
+    }
+  },
+  "CLIPTextEncode_neg": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "{{negative_prompt | default('blurry, low quality, distorted')}}",
+      "clip": ["CheckpointerLoader", 1]
+    }
+  },
+  "CheckpointerLoader": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "svd.safetensors"
+    }
+  },
+  "VAEDecode": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["KSampler", 0],
+      "vae": ["CheckpointerLoader", 0]
+    }
+  },
+  "VHS_VideoCombine": {
+    "class_type": "VHS_VideoCombine",
+    "inputs": {
+      "images": ["VAEDecode", 0],
+      "fps": "{{fps | default(30)}}",
+      "filename_prefix": "svd_video",
+      "output_dir": "/output"
+    }
+  }
+}
