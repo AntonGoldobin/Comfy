@@ -32,5 +32,6 @@ jobs:
           context: .
           file: ./Dockerfile.serverless
           push: true
-          tags: ghcr.io/antongoldobin/comfy-runpod:latest
+          platforms: linux/amd64
+          tags: ghcr.io/antongoldobin/comfyui-runpod:latest
           no-cache: true

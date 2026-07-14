@@ -1,0 +1,36 @@
+[project]
+name = "comfyui-serverless"
+[project.build]
+dockerfile = "Dockerfile.serverless"
+image = "ghcr.io/antongoldobin/comfyui-runpod:latest"
+
+[builder]
+auth = { registry = "ghcr.io", username = "AntonGoldobin" }
+
+[container]
+port = 8188
+health_check = "http://localhost:8188/system_stats"
+env = [
+  { key = "PYTHONUNBUFFERED", value = "1" },
+  { key = "COMFYUI_URL", value = "http://localhost:8188" },
+  { key = "COMFYUI_API_KEY", value = "" },
+  { key = "S3_BUCKET", value = "reelant" },
+  { key = "S3_ACCESS_KEY_ID", value = "7O9TQ5oGb1Wc08JE" },
+  { key = "S3_SECRET_ACCESS_KEY", value = "36ruqaAh95fiSPxs36mggWPK3YhXYafJ" },
+  { key = "S3_ENDPOINT_URL", value = "https://s3-api.cr.golden-antelope.ru" },
+  { key = "S3_REGION", value = "us-east-1" },
+]
+
+[container.resources]
+gpu = "NVIDIA RTX 4090"
+gpu_count = 1
+container_disk = { size_gb = 50 }
+volume_disk = { size_gb = 100 }
+min_vcpu = 2
+max_vcpu = 4
+
+[container.startup]
+command = "/workspace/ComfyUI/startup.sh"
+
+[container.volumes]
+network_volume = "mbs1d3xwt0"

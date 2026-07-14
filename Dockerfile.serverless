@@ -1,28 +1,43 @@
-FROM docker.io/comfyui/base:latest
+FROM nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04
 
-# Install Python dependencies for the handler
+# Установка базовых пакетов
+RUN apt-get update && apt-get install -y \
+  git python3-pip python3-dev \
+  && rm -rf /var/lib/apt/lists/*
+
+# === Установка ComfyUI ===
+RUN git clone https://github.com/comfyanonymous/ComfyUI.git /workspace/ComfyUI
+WORKDIR /workspace/ComfyUI
+
+# Основные зависимости
+RUN pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+RUN pip install --no-cache-dir -r requirements.txt
+
+# ComfyUI Manager + видео ноды
+RUN pip install comfyui-manager
+
+RUN cd custom_nodes && \
+  git clone https://github.com/ltdrdata/ComfyUI-Manager.git && \
+  git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git && \
+  git clone https://github.com/Kosinkadink/ComfyUI-AnimateDiff-Evolved.git
+
+# Копируем твои файлы
 COPY requirements.txt /tmp/
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt || true
 
-# Copy handler files
 COPY runpod_handler.py /workspace/ComfyUI/
 COPY handler.py /workspace/ComfyUI/
 COPY startup.sh /workspace/ComfyUI/
 
-# Create output and input directories
-RUN mkdir -p /output /input && chmod +x /workspace/ComfyUI/startup.sh
+RUN mkdir -p /output /input /workspace/ComfyUI/workflows && \
+  chmod +x /workspace/ComfyUI/startup.sh
 
-# Set environment
 ENV PYTHONUNBUFFERED=1
 ENV COMFYUI_URL=http://localhost:8188
-ENV COMFYUI_API_KEY=
 
-# ComfyUI API port
 EXPOSE 8188
 
-# Health check - ComfyUI API
-HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD curl -sf http://localhost:8188/system_stats || exit 1
 
-# Start ComfyUI, wait for it, then run the RunPod handler
 ENTRYPOINT ["/workspace/ComfyUI/startup.sh"]
