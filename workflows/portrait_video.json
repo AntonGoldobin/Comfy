@@ -1,54 +1,54 @@
 {
-  "LoadImage": {
+  "3": {
     "class_type": "LoadImage",
     "inputs": {
       "image": "{{input_image}}"
     }
   },
-  "SVD_img2vid_Portrait": {
+  "4": {
     "class_type": "SVD_img2vid_Conditioning",
     "inputs": {
-      "image": ["LoadImage", 0],
-      "strength": 0.9
+      "image": ["3", 0],
+      "strength": "{{strength | default(0.9)}}"
     }
   },
-  "EmptyLatentVideo_Portrait": {
+  "5": {
     "class_type": "EmptyLatentVideo",
     "inputs": {
       "width": 512,
       "height": 768,
-      "frames": 25,
+      "frames": "{{frames | default(25)}}",
       "batch_size": 1
     }
   },
-  "SVD_Sampler_Portrait": {
+  "6": {
     "class_type": "SVD_Sampler",
     "inputs": {
       "seed": "{{seed | default(123)}}",
-      "steps": 25,
-      "cfg": 6.0,
+      "steps": "{{steps | default(25)}}",
+      "cfg": "{{cfg | default(6.0)}}",
       "sampler_name": "euler",
       "scheduler": "normal",
-      "conditioning": ["SVD_img2vid_Portrait", 0],
-      "latent_image": ["EmptyLatentVideo_Portrait", 0]
+      "conditioning": ["4", 0],
+      "latent_image": ["5", 0]
     }
   },
-  "VAEDecode_Portrait": {
+  "7": {
     "class_type": "VAEDecode",
     "inputs": {
-      "samples": ["SVD_Sampler_Portrait", 0],
-      "vae": ["SVD_Load_Portrait", 0]
+      "samples": ["6", 0],
+      "vae": ["8", 0]
     }
   },
-  "SVD_Load_Portrait": {
+  "8": {
     "class_type": "SVD_Load",
     "inputs": {}
   },
-  "VHS_VideoCombine_Portrait": {
+  "9": {
     "class_type": "VHS_VideoCombine",
     "inputs": {
-      "images": ["VAEDecode_Portrait", 0],
-      "fps": 24,
+      "images": ["7", 0],
+      "fps": "{{fps | default(24)}}",
       "filename_prefix": "portrait_video",
       "output_dir": "/output"
     }
