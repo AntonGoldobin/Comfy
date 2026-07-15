@@ -1,30 +1,13 @@
-FROM nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04
+# Using pre-built ComfyUI image to avoid "No space left on device" on GitHub Actions
+FROM docker.io/comfyui/comfyui:latest
 
-# Установка базовых пакетов
-RUN apt-get update && apt-get install -y \
-  git python3-pip python3-dev \
-  && rm -rf /var/lib/apt/lists/*
-
-# === Установка ComfyUI ===
-RUN git clone https://github.com/comfyanonymous/ComfyUI.git /workspace/ComfyUI
-WORKDIR /workspace/ComfyUI
-
-# Основные зависимости
-RUN pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
-RUN pip install --no-cache-dir -r requirements.txt
-
-# ComfyUI Manager + видео ноды
-RUN pip install comfyui-manager
-
-RUN cd custom_nodes && \
+# Install custom nodes (runpod requirements already in base image)
+RUN cd /workspace/ComfyUI/custom_nodes && \
   git clone https://github.com/ltdrdata/ComfyUI-Manager.git && \
   git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git && \
   git clone https://github.com/Kosinkadink/ComfyUI-AnimateDiff-Evolved.git
 
-# Копируем твои файлы
-COPY requirements.txt /tmp/
-RUN pip install --no-cache-dir -r /tmp/requirements.txt || true
-
+# Copy handler files
 COPY runpod_handler.py /workspace/ComfyUI/
 COPY handler.py /workspace/ComfyUI/
 COPY startup.sh /workspace/ComfyUI/
